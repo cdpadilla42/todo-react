@@ -24,14 +24,63 @@ const defaultCoffees = [
 ];
 
 class NewCoffeeForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: '',
+      description: '',
+      tasted: false
+    };
+  }
+
+  updateTitleChange(e) {
+    const val = e.target.value;
+    this.setState({
+      title: val
+    });
+  }
+
+  updateDescChange(e) {
+    const val = e.target.value;
+    this.setState({
+      description: val
+    });
+  }
+
+  updateTastedCheck(e) {
+    const val = !this.state.tasted;
+    this.setState({
+      tasted: val
+    });
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    // extracts form values - Use obj destructuring :)
+    const title = this.state.title;
+    const description = this.state.description;
+    const tasted = this.state.tasted;
+    const key = 10 + this.props.coffees.length;
+    const newCoffee = { title, description, tasted, key };
+    // passes data up from prop function
+    this.props.addCoffee(newCoffee);
+    // clears state
+  }
+
   render() {
     return (
       <div className="Coffee-Form">
-        {/* <h1>Submit New Coffee</h1>
-        <form>
+        <h1>Submit New Coffee</h1>
+        <form onSubmit={this.handleSubmit.bind(this)}>
           <p>
             <label htmlFor="title">Coffee Name:</label>
-            <input type="text" id="title" name="title" value={this.props.formValue.title}></input>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={this.state.title}
+              onChange={this.updateTitleChange.bind(this)}
+            ></input>
           </p>
           <p>
             <label htmlFor="description">Description:</label>
@@ -39,7 +88,8 @@ class NewCoffeeForm extends React.Component {
               type="text"
               id="description"
               name="description"
-              value={this.props.formValue.description}
+              value={this.state.description}
+              onChange={this.updateDescChange.bind(this)}
             ></input>
           </p>
           <p>
@@ -48,26 +98,38 @@ class NewCoffeeForm extends React.Component {
               type="checkbox"
               id="tasted"
               name="tasted"
-              checked={this.props.formValue.tasted}
+              checked={this.state.tasted}
+              onChange={this.updateTastedCheck.bind(this)}
             ></input>
           </p>
-        </form> */}
+          <input type="submit"></input>
+        </form>
       </div>
     );
   }
 }
 
 class Coffee extends React.Component {
-  handleClick = key => {
-    console.log('big gulp');
-    this.props.drinkCoffee();
+  handleClick = e => {
+    const key = parseInt(e.target.getAttribute('data-key'));
+    this.props.drinkCoffee(key);
+  };
+
+  handleDelete = e => {
+    const key = parseInt(e.target.getAttribute('data-key'));
+    this.props.deleteCoffee(key);
   };
 
   render() {
     return (
       <div className="coffee">
         <h3>{this.props.coffee.title}</h3>
-        <p onClick={this.handleClick}>Tasted? {this.props.coffee.tasted ? 'Yes!' : 'Not yet!'}</p>
+        <p onClick={this.handleClick} data-key={this.props.coffee.key}>
+          Tasted? {this.props.coffee.tasted ? 'Yes!' : 'Not yet!'}
+        </p>
+        <p onClick={this.handleDelete} data-key={this.props.coffee.key}>
+          Delete
+        </p>
       </div>
     );
   }
@@ -79,7 +141,14 @@ class CoffeeList extends React.Component {
       <div>
         <h1>Coffee List</h1>
         {this.props.coffees.map(coffee => {
-          return <Coffee coffee={coffee} key={coffee.key} />;
+          return (
+            <Coffee
+              coffee={coffee}
+              key={coffee.key}
+              drinkCoffee={this.props.drinkCoffee}
+              deleteCoffee={this.props.deleteCoffee}
+            />
+          );
         })}
       </div>
     );
@@ -90,35 +159,39 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      coffees: [...defaultCoffees],
-      formValue: {
-        title: '',
-        description: '',
-        tasted: false
-      },
-      searchText: ''
+      coffees: [...defaultCoffees]
     };
   }
 
-  drinkCoffee = () => {
-    console.log('gulp');
-    // this.setState({
-    //   coffees: this.state.coffees.map(coffee => {
-    //     if (coffee.key === coffeeKey) {
-    //       coffee.tasted = !coffee.tasted;
-    //     }
-    //     return coffee;
-    //   })
-    // });
+  addCoffee = newCoffee => {
+    const currentCoffeeList = this.state.coffees;
+    this.setState({ coffees: [...currentCoffeeList, newCoffee] });
+  };
 
-    // // copy current list of coffees
-    // let coffees = this.state.coffees;
-    // // find the current coffee in the list
-    // let currentCoffee = coffees.find(obj => obj.key === coffeeKey);
-    // // make the change
-    // currentCoffee.tasted = !currentCoffee.tasted;
-    // // reset state to replace with this list
-    // this.setState({ coffees: coffees });
+  deleteCoffee = coffeeKey => {
+    let currentCoffeeList = this.state.coffees;
+    console.log(currentCoffeeList, "before")
+    currentCoffeeList = currentCoffeeList.filter(function(obj) {
+      return obj.key !== coffeeKey;
+    });
+    console.log(currentCoffeeList, "after")
+    this.setState({ coffees: currentCoffeeList });
+  };
+
+  drinkCoffee = coffeeKey => {
+    console.log('Hello from App!', coffeeKey);
+    const coffeeList = this.state.coffees.map(coffee => {
+      if (coffee.key === coffeeKey) {
+        coffee.tasted = !coffee.tasted;
+      }
+      return coffee;
+    });
+
+    console.log(coffeeList);
+
+    this.setState({
+      coffees: coffeeList
+    });
   };
 
   render() {
@@ -126,10 +199,18 @@ class App extends React.Component {
       <div className="coffee-journal">
         <h1>Coffee Journal</h1>
         <div className="coffee-list">
-          <CoffeeList coffees={this.state.coffees} drinkCoffee={this.drinkCoffee} />
+          <CoffeeList
+            coffees={this.state.coffees}
+            drinkCoffee={this.drinkCoffee.bind(this)}
+            deleteCoffee={this.deleteCoffee.bind(this)}
+          />
         </div>
         <div className="coffee-form">
-          <NewCoffeeForm formValue={this.state.formValue} />
+          <NewCoffeeForm
+            formValue={this.state.formValue}
+            addCoffee={this.addCoffee.bind(this)}
+            coffees={this.state.coffees}
+          />
         </div>
       </div>
     );

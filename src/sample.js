@@ -75,3 +75,90 @@ class Game extends React.Component {
     );
   }
 }
+
+
+// ================================
+
+class SearchForm extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      searchText: ''
+    }
+  }
+
+  submitForm() {
+    e.preventDefault();
+  }
+
+  updateSearchInput(e) {
+    const val = e.target.value;
+    this.setState({
+      searchText: val
+    })
+  }
+
+  SearchForm.propTypes = {
+    onSubmit: PropTypes.func.isRequired,
+    searchVisible: PropTypes.bool
+  }
+
+  SearchForm.defaultProps = {
+    onSubmit: () => {},
+    searchVisible: false
+  }
+
+  render() {
+
+    const { searchVisible } = this.state;
+    let searchClasses = ['searchInput']
+
+    <form onSubmit={this.submitForm.bind(this)}>
+      <input
+      type="text"
+      className={searchClasses.join(' ')}
+      placeholder="Search ..." />  
+    </form>
+  }
+}
+
+class Header extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      searchVisible: false
+    }
+  }
+
+  showSearch() {
+    this.setState({
+      searchVisible: !this.state.searchVisible
+    })
+  }
+
+  render() {
+    // Classes to add to the <input /> element
+    let searchInputClasses = ["searchInput"];
+    if (this.state.searchVisible) {
+      searchInputClasses.push("active");
+    }
+    return (
+      <div className="header">
+        <div className="menuIcon">
+          <div className="dashTop"></div>
+          <div className="dashBottom"></div>
+          <div className="circle"></div>
+        </div>
+
+        <span className="title">
+          {this.props.title}
+        </span>
+
+        <SearchForm searchVisible={this.props.searchVisible}/>
+
+        <div className="fa fa-search searchIcon"></div>
+      </div>
+    )
+  }
+}
