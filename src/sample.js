@@ -89,6 +89,7 @@ class SearchForm extends React.Component {
 
   submitForm() {
     e.preventDefault();
+    this.props.onSearch(this.state.searchText);
   }
 
   updateSearchInput(e) {
@@ -131,6 +132,10 @@ class Header extends React.Component {
     }
   }
 
+  Header.propTypes = {
+    onSearch: PropTypes.func
+  }
+
   showSearch() {
     this.setState({
       searchVisible: !this.state.searchVisible
@@ -155,10 +160,42 @@ class Header extends React.Component {
           {this.props.title}
         </span>
 
-        <SearchForm searchVisible={this.props.searchVisible}/>
+        <SearchForm searchVisible={this.props.searchVisible} onSubmit={this.props.onSearch}/>
 
         <div className="fa fa-search searchIcon"></div>
       </div>
     )
+  }
+}
+
+class Content extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      activities: data,
+    }
+  }
+
+  handleSearch(val) {
+    // handle search
+  }
+
+  render() {
+    const { activities } = this.state; // ES6 destructuring
+
+    return (
+      <div>
+        <Header
+          title="Github activity" 
+          onSearch={this.handleSearch.bind(this)}/>
+        <div className="content">
+          <div className="line" />
+          {/* Timeline item */}
+          {activities.map(activity => (
+            <ActivityItem key={activity.id} activity={activity} />
+          ))}
+        </div>
+      </div>
+    );
   }
 }

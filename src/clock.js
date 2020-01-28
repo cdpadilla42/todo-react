@@ -9,12 +9,21 @@ class Clock extends React.Component {
 
   getTime() {
     const currentTIme = new Date();
-      return (
-      hours = currentTime.getHours(),
-      minutes = currentTime.getMinutes(),
-      seconds = currentTime.getSeconds(),
-      ampm = hours >= 12 ? 'pm' : 'am';
-    )
+      return {
+      hours: currentTime.getHours(),
+      minutes: currentTime.getMinutes(),
+      seconds: currentTime.getSeconds(),
+      ampm: hours >= 12 ? 'pm' : 'am'
+    }
+  }
+
+  setTime() {
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(this.updateClock.bind(this), 1000);
+  }
+
+  updateClock() {
+    this.setState({currentTime: this.getTime}, this.setTimer)
   }
   
   render() {

@@ -65,15 +65,22 @@ class NewCoffeeForm extends React.Component {
     // passes data up from prop function
     this.props.addCoffee(newCoffee);
     // clears state
+    this.setState({
+      title: '',
+      description: '',
+      tasted: false
+    })
   }
 
   render() {
     return (
-      <div className="Coffee-Form">
+      <div className="coffee-form">
         <h1>Submit New Coffee</h1>
         <form onSubmit={this.handleSubmit.bind(this)}>
           <p>
             <label htmlFor="title">Coffee Name:</label>
+          </p>
+          <p>
             <input
               type="text"
               id="title"
@@ -84,6 +91,8 @@ class NewCoffeeForm extends React.Component {
           </p>
           <p>
             <label htmlFor="description">Description:</label>
+          </p>
+          <p>
             <input
               type="text"
               id="description"
@@ -124,6 +133,9 @@ class Coffee extends React.Component {
     return (
       <div className="coffee">
         <h3>{this.props.coffee.title}</h3>
+        <p>
+          Notes: {this.props.coffee.description}
+        </p>
         <p onClick={this.handleClick} data-key={this.props.coffee.key}>
           Tasted? {this.props.coffee.tasted ? 'Yes!' : 'Not yet!'}
         </p>
@@ -165,16 +177,16 @@ class App extends React.Component {
 
   addCoffee = newCoffee => {
     const currentCoffeeList = this.state.coffees;
-    this.setState({ coffees: [...currentCoffeeList, newCoffee] });
+    this.setState({ coffees: [newCoffee, ...currentCoffeeList] });
   };
 
   deleteCoffee = coffeeKey => {
     let currentCoffeeList = this.state.coffees;
-    console.log(currentCoffeeList, "before")
+    console.log(currentCoffeeList, 'before');
     currentCoffeeList = currentCoffeeList.filter(function(obj) {
       return obj.key !== coffeeKey;
     });
-    console.log(currentCoffeeList, "after")
+    console.log(currentCoffeeList, 'after');
     this.setState({ coffees: currentCoffeeList });
   };
 
@@ -197,19 +209,19 @@ class App extends React.Component {
   render() {
     return (
       <div className="coffee-journal">
-        <h1>Coffee Journal</h1>
+        <header>
+          <h1 className="title">Coffee Journal</h1>
+        </header>
         <div className="coffee-list">
-          <CoffeeList
-            coffees={this.state.coffees}
-            drinkCoffee={this.drinkCoffee.bind(this)}
-            deleteCoffee={this.deleteCoffee.bind(this)}
-          />
-        </div>
-        <div className="coffee-form">
           <NewCoffeeForm
             formValue={this.state.formValue}
             addCoffee={this.addCoffee.bind(this)}
             coffees={this.state.coffees}
+          />
+          <CoffeeList
+            coffees={this.state.coffees}
+            drinkCoffee={this.drinkCoffee.bind(this)}
+            deleteCoffee={this.deleteCoffee.bind(this)}
           />
         </div>
       </div>
